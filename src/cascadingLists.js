@@ -112,32 +112,37 @@
  			}
  		};
 
-
- 		function ajax(obj) {
- 			var request = new XMLHttpRequest();
- 			request.open('GET', obj.url, true);
-
- 			request.onload = function() {
- 				if (this.status >= 200 && this.status < 400) {
- 					// Success!
- 					var resp = this.response;
- 					obj.success(resp, this.statusText, this);
- 				} else {
- 					// We reached our target server, but it returned an error
-
- 				}
- 			};
-
- 			request.onerror = function() {
- 				obj.error(this, this.statusText, this.response);
- 			};
-
- 			return request.send();
- 		}
-
-
  		UTILS.extend({
- 			ajax: $.ajax
+ 			ajax: function(obj) {
+ 				obj = obj || {};
+ 				var defaults = {
+ 					url: window.location.href,
+ 					success: function() {},
+ 					error: function() {}
+ 				};
+
+ 				var opts = UTILS.extend({},defaults, obj);
+
+ 				var request = new XMLHttpRequest();
+ 				request.open('GET', obj.url, true);
+
+ 				request.onload = function() {
+ 					if (this.status >= 200 && this.status < 400) {
+ 						// Success!
+ 						var resp = this.response;
+ 						obj.success(resp, this.statusText, this);
+ 					} else {
+ 						obj.error(this, this.statusText, this.response);
+
+ 					}
+ 				};
+
+ 				request.onerror = function() {
+ 					obj.error(this, this.statusText, this.response);
+ 				};
+
+ 				return request.send();
+ 			}
  		});
 
  		function CascadingLists() {
