@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 	grunt.config.init({
 		watch: {
 			client: {
-				files: ['*.*'],
+				files: ['index.html', 'src/*.js'],
 				options: {
 					livereload: '<%= connect.options.livereload %>'
 				},
