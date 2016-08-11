@@ -9,7 +9,7 @@
  })('CascadingLists', this, function() {
  	return (function() {
 
-
+ 		var cascades = [];
 
  		/*
  		 *  UTILS - Object Literal for common functions.
@@ -101,7 +101,7 @@
  									clone = src && jQuery.isPlainObject(src) ? src : {};
  								}
  								// WARNING: RECURSION
- 								target[name] = extend(deep, clone, copy);
+ 								target[name] = UTILS.extend(deep, clone, copy);
  							} else if (copy !== undefined) {
  								target[name] = copy;
  							}
@@ -121,52 +121,178 @@
  					error: function() {}
  				};
 
- 				var opts = UTILS.extend({},defaults, obj);
+ 				var opts = UTILS.extend({}, defaults, obj);
 
  				var request = new XMLHttpRequest();
- 				request.open('GET', obj.url, true);
+ 				request.open('GET', opts.url, true);
 
  				request.onload = function() {
  					if (this.status >= 200 && this.status < 400) {
  						// Success!
  						var resp = this.response;
- 						obj.success(resp, this.statusText, this);
+ 						opts.success(resp, this.statusText, this);
  					} else {
- 						obj.error(this, this.statusText, this.response);
+ 						opts.error(this, this.statusText, this.response);
 
  					}
  				};
 
  				request.onerror = function() {
- 					obj.error(this, this.statusText, this.response);
+ 					opts.error(this, this.statusText, this.response);
  				};
 
  				return request.send();
+ 			},
+ 			each: function(arr, callback) {
+ 				Array.prototype.forEach.call(arr, callback);
+ 				return arr;
  			}
  		});
 
- 		function CascadingLists() {
+ 		/*
+ 		 *  broadcaster: html select node that is listend to when to update
+ 		 *  listener:  html select node that changes based on the broadcaster
+ 		 *  url: text
+ 		 *  mapping: object {value: value, label: label}
+ 		 *  onSuccces: funtion anything additional you want done once the resouce call to populate the drop down is successfully called
+ 		 *  onError: funtion anything additional you want done once the resouce call to populate the drop down is unsuccessfully called
+ 		 */
+
+ 		function CascadingLists(obj /* an object with the above properties*/ ) {
  			if (arguments.length === 0) {
  				throw 'CascadingLists can not be used without any arguments';
  			}
  			if (!(this instanceof CascadingLists)) {
- 				return new CascadingLists(arguments);
+ 				return new CascadingLists(obj);
  			}
- 			this.listOptions = [];
+
+ 			var self = this;
+
+ 			var defaults = {
+ 				ajax: false,
+ 				broadcaster: null,
+ 				listener: null,
+ 				url: window.location.href,
+ 				mapping: null,
+ 				onSuccess: noop,
+ 				onError: noop,
+ 				onBroadCasterChange: noop,
+ 				nonAjaxChange: noop
+ 			};
+
+ 			var opts = {};
+
+ 			UTILS.extend(true, opts, defaults, obj);
+
+ 			init();
+
+
+
+ 			function init() {
+ 				selectNodeCheck(opts.listener);
+ 				selectNodeCheck(opts.broadcaster);
+
+ 				UTILS.extend(self, {
+ 					destroy: destroy,
+ 					outputOptionTags: outputOptionTags,
+ 					destroyOptionTags: destroyOptionTags,
+ 					option: option
+ 				});
+
+ 				cascades.push(self);
+ 				/*
+ 				 * Add EventListener to broadcaster
+ 				 */
+
+ 				opts.broadcaster.addEventListener('change', broadCasterFunction);
+ 			}
+
+ 			function option(opt, value) {
+ 				if (value) {
+ 					opts[opt] = value;
+ 					return self;
+ 				} else {
+ 					return opts[opt];
+ 				}
+ 			}
+
+ 			function destroy() {
+ 				opts.broadcaster.removeEventListener('change', broadCasterFunction);
+ 				var index = cascades.indexOf(self);
+ 				if (index !== -1) {
+ 					cascades.splice(index, 1);
+ 				}
+ 				destroyOptionTags(skipFirst);
+ 			}
+
+ 			function destroyOptionTags(skipFirst) {
+ 				var select = opts.listener;
+ 				var options = select.querySelectorAll('option');
+ 				UTILS.each(options, function(option, index) {
+ 					if (skipFirst && index === 0) {
+ 						return;
+ 					} else {
+ 						option.parentNode.removeChild(option);
+ 					}
+
+ 				});
+
+ 				return self;
+ 			}
+
+ 			function outputOptionTags(datas, attributes) {
+ 				var frag = document.createDocumentFragment();
+ 				datas.forEach(function(data) {
+ 					var option = document.createElement('option');
+ 					if (attributes) {
+ 						for (var prop in attributes) {
+ 							option.setAttribute(prop, attributes[prop]);
+ 						}
+ 					}
+
+ 					option.setAttribute('value', data.value);
+ 					option.innerText = data.label;
+
+ 					frag.appendChild(option);
+ 				});
+
+ 				opts.listener.appendChild(frag);
+
+ 				return self;
+ 			}
+
+ 			function broadCasterFunction() {
+ 				opts.onBroadCasterChange.call(self, opts);
+ 				if (opts.ajax) {
+ 					UTILS.ajax({
+ 						url: opts.url,
+ 						success: opts.onSuccess,
+ 						error: opts.onError,
+ 					});
+ 				}
+
+ 			}
+
+
+
+ 			return self;
  		}
 
- 		CascadingLists.ajaxLib = function(func) {
- 			Utils.ajax = func;
+ 		CascadingLists.destroyAllLists = function() {
+ 			cascades.forEach(function(cascade) {
+ 				cascade.destroy();
+ 			});
+
+ 			cascades = [];
  		};
 
- 		// reqwest.compat({
- 		// 	url: 'https://vpic.nhtsa.dot.gov/api/vehicles/GetAllMakes?format=json',
- 		// 	dataType: 'json',
- 		// 	method: 'get',
- 		// 	success: function(){
- 		// 		console.log(arguments);
- 		// 	}
- 		// });
+ 		function selectNodeCheck(el) {
+ 			if (!el || !el.nodeName || el.nodeName.toLowerCase() !== 'select') {
+ 				throw el + ' should be a SELECT element';
+ 			}
+ 		}
+
+ 		function noop() {}
 
 
  		return CascadingLists;

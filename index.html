@@ -1,12 +1,91 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Cascading Lists</title>
-	<link rel="stylesheet" href="">
-</head>
-<body>
-	<script src="src/cascadingLists.js"></script>
-</body>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>Cascading Lists</title>
+		<link rel="stylesheet" href="">
+	</head>
+	<body>
+		<select name="manufactuer" id="manufactuer">
+			<option value="">Select Make</option>
+			<option value="acura">Acura</option>
+			<option value="alfa-romeo">Alfa Romeo</option>
+			<option value="aston-martin">Aston Martin</option>
+			<option value="audi">Audi</option>
+			<option value="bentley">Bentley</option>
+			<option value="bmw">BMW</option>
+			<option value="buick">Buick</option>
+			<option value="cadillac">Cadillac</option>
+			<option value="chevrolet">Chevrolet</option>
+			<option value="chrysler">Chrysler</option>
+			<option value="dodge">Dodge</option>
+			<option value="ferrari">Ferrari</option>
+			<option value="fiat">FIAT</option>
+			<option value="ford">Ford</option>
+			<option value="genesis">Genesis</option>
+			<option value="gmc">GMC</option>
+			<option value="honda">Honda</option>
+			<option value="hyundai">Hyundai</option>
+			<option value="infiniti">Infiniti</option>
+			<option value="jaguar">Jaguar</option>
+			<option value="jeep">Jeep</option>
+			<option value="kia">Kia</option>
+			<option value="lamborghini">Lamborghini</option>
+			<option value="land-rover">Land Rover</option>
+			<option value="lexus">Lexus</option>
+			<option value="lincoln">Lincoln</option>
+			<option value="lotus">Lotus</option>
+			<option value="maserati">Maserati</option>
+			<option value="mazda">Mazda</option>
+			<option value="mclaren">McLaren</option>
+			<option value="mercedes-benz">Mercedes-Benz</option>
+			<option value="mini">MINI</option>
+			<option value="mitsubishi">Mitsubishi</option>
+			<option value="nissan">Nissan</option>
+			<option value="porsche">Porsche</option>
+			<option value="ram">Ram</option>
+			<option value="rolls-royce">Rolls-Royce</option>
+			<option value="scion">Scion</option>
+			<option value="smart">smart</option>
+			<option value="subaru">Subaru</option>
+			<option value="tesla">Tesla</option>
+			<option value="toyota">Toyota</option>
+			<option value="volkswagen">Volkswagen</option>
+			<option value="volvo">Volvo</option>
+		</select>
+
+		<select name="model" id="model">
+			<option value="">Select Make</option>
+		</select>
+		<script src="src/cascadingLists.js"></script>
+	</body>
+
+
+	<script>
+		var c = CascadingLists({
+			ajax: true,
+		 	broadcaster: document.querySelector('#manufactuer'),
+		 	listener: document.querySelector('#model'),
+		 	onBroadCasterChange: function(opts) {
+		 		opts.url = 'https://vpic.nhtsa.dot.gov/api//vehicles/GetModelsForMake/' + opts.broadcaster.value + '?format=json';
+		 	},
+		 	onSuccess: function(resp, statusText, xhr){
+		 		c.destroyOptionTags(true);
+		 		var j = JSON.parse(resp);
+		 		var output = [];
+		 		var datas = j.Results;
+		 		datas.forEach(function(data){
+		 			var obj ={};
+		 			obj.value = data.Model_Name;
+		 			obj.label = data.Model_Name;
+		 			output.push(obj);
+		 		});
+
+		 		c.outputOptionTags(output);
+		 	}
+		 });
+	</script>
+
+
 </html>
