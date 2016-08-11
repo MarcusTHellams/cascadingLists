@@ -150,6 +150,7 @@
  		});
 
  		/*
+ 		 *  ajax: boolean. if when the options for the listener don't come from an ajax call
  		 *  broadcaster: html select node that is listend to when to update
  		 *  listener:  html select node that changes based on the broadcaster
  		 *  url: text
