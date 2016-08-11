@@ -156,6 +156,8 @@
  		 *  mapping: object {value: value, label: label}
  		 *  onSuccces: funtion anything additional you want done once the resouce call to populate the drop down is successfully called
  		 *  onError: funtion anything additional you want done once the resouce call to populate the drop down is unsuccessfully called
+ 		 *  onBroadCasterChange: functon called when broacaster is changed
+ 		 *  nonAjaxChange: function to call when the options for the listener don't come from an ajax call
  		 */
 
  		function CascadingLists(obj /* an object with the above properties*/ ) {
