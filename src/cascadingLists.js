@@ -168,8 +168,8 @@
  		 */
 
  		function CascadingLists(obj /* an object with the above properties*/ ) {
- 			if (arguments.length === 0) {
- 				throw 'CascadingLists can not be used without any arguments';
+ 			if (arguments.length === 0 || typeof obj !== 'object') {
+ 				throw 'CascadingLists can not be used without the proper parameters';
  			}
  			if (!(this instanceof CascadingLists)) {
  				return new CascadingLists(obj);
