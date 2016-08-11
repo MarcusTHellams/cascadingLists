@@ -117,8 +117,10 @@
  				obj = obj || {};
  				var defaults = {
  					url: window.location.href,
- 					success: function() {},
- 					error: function() {}
+ 					success: noop,
+ 					error: noop,
+ 					beforeCall: noop,
+ 					afterCall: noop
  				};
 
  				var opts = UTILS.extend({}, defaults, obj);
@@ -131,16 +133,19 @@
  						// Success!
  						var resp = this.response;
  						opts.success(resp, this.statusText, this);
+ 						opts.afterCall();
  					} else {
  						opts.error(this, this.statusText, this.response);
+ 						opts.afterCall();
 
  					}
  				};
 
  				request.onerror = function() {
  					opts.error(this, this.statusText, this.response);
+ 					opts.afterCall();
  				};
-
+ 				opts.beforeCall();
  				return request.send();
  			},
  			each: function(arr, callback) {
@@ -179,6 +184,8 @@
  				mapping: null,
  				onSuccess: noop,
  				onError: noop,
+ 				beforeCall: noop,
+ 				afterCall: noop,
  				onBroadCasterChange: noop,
  				nonAjaxChange: noop
  			};
@@ -271,6 +278,8 @@
  						url: opts.url,
  						success: opts.onSuccess,
  						error: opts.onError,
+ 						beforeCall: opts.beforeCall,
+ 						afterCall: opts.afterCall
  					});
  				}
 
