@@ -159,9 +159,10 @@
  		 *  broadcaster: html select node that is listend to when to update
  		 *  listener:  html select node that changes based on the broadcaster
  		 *  url: text
- 		 *  mapping: object {value: value, label: label}
  		 *  onSuccces: funtion anything additional you want done once the resouce call to populate the drop down is successfully called
  		 *  onError: funtion anything additional you want done once the resouce call to populate the drop down is unsuccessfully called
+ 		 *  beforeCall: function to call before ajax call is made,
+ 		 *  afterCall: function to call after ajax call is made,
  		 *  onBroadCasterChange: functon called when broacaster is changed
  		 *  nonAjaxChange: function to call when the options for the listener don't come from an ajax call
  		 */
@@ -181,7 +182,6 @@
  				broadcaster: null,
  				listener: null,
  				url: window.location.href,
- 				mapping: null,
  				onSuccess: noop,
  				onError: noop,
  				beforeCall: noop,
